@@ -1,0 +1,54 @@
+/* This file contains the majority of css used in the project */
+
+/* Set the background */
+html, body {
+  background-color: #fff;
+  height: auto;
+}
+
+/* Ids */
+#wrapper {
+  width: 90vw;
+  padding: 10px;
+  height: 100%;
+  border: 1px solid black;
+  display: inherit;
+}
+
+#canvas {
+  border: 1px solid black;
+  display: block;
+}
+
+#output-wrapper {
+  width: 80%;
+  display: block;
+}
+
+#options-wrapper {
+  width: auto;
+  display: block;
+  padding: 5px;
+  border: 1px solid black;
+  display: block;
+}
+
+#output {
+  width: 100%;
+  font-size: 13pt;
+}
+
+/* Classes */
+.center {
+  margin: 0 auto;
+  margin-top: 20px;
+  display: block;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.option-item {
+  display: inline;
+}
