@@ -197,6 +197,7 @@ $(document).ready(function(){
   setInterval(function(){
     ctx.drawImage(background, 0, 0);
 
+    //Draw snapping lines
     if (createMode){
       if (isShiftDown && nodes.length > 0){
         let node = nodes[nodes.length - 1];
@@ -242,15 +243,16 @@ $(document).ready(function(){
       }
     }
 
+    //Draw all nodes
     for (let node in nodes){
       nodes[node].draw();
     }
   }, 60 / 1000);
 
-  //Create the file
+  //Create the file on button click
   createButton.click(function(){
 
-    //Get values
+    //Get field values
     fileName = $('#file-name').val()
     opmodeName = $('#opmode-name').val()
     if (fileName === '' || opmodeName === '' || !fileName || !opmodeName){
@@ -274,9 +276,9 @@ $(document).ready(function(){
 
       //Turning
       if (!twoNodes) break;
-      x = Math.abs(nextNode.x - twoNodes.x);
-      y = Math.abs(nextNode.y - twoNodes.y);
-      let theta = Math.atan(y / x) * (180 / Math.PI);
+      x = nextNode.x - twoNodes.x;
+      y = nextNode.y - twoNodes.y;
+      let theta = Math.atan((twoNodes.x - nextNode.x) / (twoNodes.y - nextNode.y)) * (180 / Math.PI);
       middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
     }
 
