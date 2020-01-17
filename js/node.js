@@ -11,6 +11,7 @@ class Node {
     this.x = x;
     this.y = y;
     this.color = '#cfcfcf';
+    this.radius = 9;
     this.nextNode = void(0)
   }
 
@@ -25,7 +26,7 @@ class Node {
     }
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
-    this.ctx.arc(this.x, this.y, 9, 0, 2 * Math.PI, false);
+    this.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
     this.ctx.fillStyle = this.color;
     ctx.fill();
     ctx.stroke();
