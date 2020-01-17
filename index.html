@@ -7,6 +7,8 @@
     <title>SPQR Autonomous Planner</title>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="js/node.js" charset="utf-8"></script>
+    <script src="js/actionNode.js" charset="utf-8"></script>
+    <script src="js/actions.js" charset="utf-8"></script>
     <script src="js/main.js" charset="utf-8"></script>
   </head>
   <body>
@@ -16,6 +18,12 @@
       </div>
       <canvas id="canvas" width="600" height="600" class="center" tabindex="1"></canvas>
       <div id="output-wrapper" class="center">
+        <p><b>X: </b><span id="x">0</span> <b>Y: </b><span id="y">0</span></p>
+        <button type="button" id="change-mode">Change mode</button>
+        <div class="center" id="actions">
+          <h3>Actions:</h3>
+          <button type="button" class="action" id="towRedButton">Tow Red</button>
+        </div>
         <h3>Options:</h3>
         <div id="options-wrapper">
           <b class="option-item">File name:&nbsp;</b>

@@ -38,6 +38,13 @@ html, body {
   font-size: 13pt;
 }
 
+#actions {
+  border: 1px solid black;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  display: block;
+}
+
 /* Classes */
 .center {
   margin: 0 auto;
@@ -51,4 +58,9 @@ html, body {
 
 .option-item {
   display: inline;
+}
+
+.action {
+  display: inline;
+  padding-right: 8px;
 }

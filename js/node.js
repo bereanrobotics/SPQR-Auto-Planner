@@ -12,7 +12,8 @@ class Node {
     this.y = y;
     this.color = '#cfcfcf';
     this.radius = 9;
-    this.nextNode = void(0)
+    this.nextNode = void(0);
+    this.hasAction = false;
   }
 
   draw(){

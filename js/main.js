@@ -4,7 +4,8 @@
 'use strict';
 
 //Global variables
-var canvas, output, createButton, fileName, opmodeName;
+var canvas, output, createButton, fileName, opmodeName, xElem, yElem, changeMode;
+var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
 var background = new Image()
@@ -14,6 +15,8 @@ var nodes = [];
 const GREEN = '#32a852';
 const RED = '#db3125';
 const GREY = '#cfcfcf';
+const ORANGE = '#ed9924';
+const PURPLE = '#a42bcc';
 const END = `        }
     }
 }`;
@@ -29,6 +32,11 @@ $(document).ready(function(){
   canvas = document.getElementById('canvas');
   output = $('#output');
   createButton = $('#create');
+  xElem = $('#x');
+  yElem = $('#y');
+  changeMode = $('#change-mode');
+
+  towRedButton = $('#towRedButton');
 
   //Canvas setup
   ctx = canvas.getContext('2d');
@@ -54,33 +62,9 @@ $(document).ready(function(){
   //Handle keyboard events
   canvas.addEventListener('keydown', function(e){
 
+    e.preventDefault();
+
     switch (e.key) {
-      case 'Enter':
-
-        //Check if user is creating nodes
-        if (createMode){
-
-          //Exit create mode
-          createMode = false;
-          for (let n in nodes){
-            let node = nodes[n];
-            node.color = '#a42bcc';
-          }
-          nodes[0].color = GREEN;
-          nodes[nodes.length - 1].color = RED;
-        } else {
-
-          //Start create mode
-          createMode = true;
-          for (let n in nodes){
-            if (n === 0) continue;
-            let node = nodes[n];
-            node.color = GREY;
-          }
-          nodes[0].color = GREEN;
-        }
-        return;
-        break;
       case 'Shift':
         isShiftDown = true;
         return;
@@ -123,9 +107,44 @@ $(document).ready(function(){
     isShiftDown = false;
   });
 
+  changeMode.click(function(){
+
+    //Check if user is creating nodes
+    if (createMode){
+
+      //Exit create mode
+      createMode = false;
+      for (let n in nodes){
+        let node = nodes[n];
+        if (!node.hasAction){
+          node.color = PURPLE;
+        }else{
+          node.color = ORANGE;
+        }
+      }
+      nodes[0].color = GREEN;
+      nodes[nodes.length - 1].color = RED;
+    } else {
+
+      //Start create mode
+      createMode = true;
+      for (let n in nodes){
+        if (n === 0) continue;
+        let node = nodes[n];
+        if (!node.hasAction){
+          node.color = GREY;
+        }else{
+          node.color = ORANGE;
+        }
+      }
+      nodes[0].color = GREEN;
+    }
+  });
+
   //Handle mouse events
   canvas.addEventListener('click', function(e){
     if (!createMode) return;
+    if (mouseX > 600 || mouseX < 0 || mouseY > 600 || mouseY < 0) return;
 
     let node = new Node(ctx, mouseX, mouseY);
     if (nodes.length <= 0) node.color = GREEN;
@@ -168,6 +187,8 @@ $(document).ready(function(){
     //Get mouse coordinates according to top left of canvas
     var x = e.pageX - canvas.offsetLeft;
     var y = e.pageY - canvas.offsetTop;
+    xElem.text(x);
+    yElem.text(y);
     mouseX = x;
     mouseY = y;
 
@@ -191,6 +212,12 @@ $(document).ready(function(){
     //Click and drag
     selectedNode.x = x;
     selectedNode.y = y;
+  });
+
+  //Actions
+  towRedButton.click(function(){
+    nodes = nodes.concat(towRed(ctx));
+    calcOrder();
   });
 
   //Main draw loop
@@ -272,13 +299,19 @@ $(document).ready(function(){
       let x = Math.abs(node.x - nextNode.x);
       let y = Math.abs(node.y - nextNode.y);
       let d = Math.sqrt(x * x + y * y) / pixelsPerMm;
-      middle += `${INDENTSPACE}drive(${d}, 1.0);\n`;
 
       //Turning
       if (!twoNodes) break;
       x = nextNode.x - twoNodes.x;
       y = nextNode.y - twoNodes.y;
       let theta = Math.atan((twoNodes.x - nextNode.x) / (twoNodes.y - nextNode.y)) * (180 / Math.PI);
+
+      if (d !== 0){
+        middle += `${INDENTSPACE}drive(${d}, 1.0);\n`;
+      }
+      if (node.hasAction){
+        middle += `${INDENTSPACE}${node.action}\n`;
+      }
       middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
     }
 
@@ -303,4 +336,12 @@ public class ${opmodeName} extends SPQRLinearOpMode {
     output.height($("textarea")[0].scrollHeight);
     document.getElementById("output").scrollIntoView()
   });
+
+  //Calculates node order
+  function calcOrder(){
+    for (let n = 0; n < nodes.length; n++){
+      if (n === nodes.length - 1) return;
+      nodes[n].nextNode = nodes[n + 1]
+    }
+  }
 });
