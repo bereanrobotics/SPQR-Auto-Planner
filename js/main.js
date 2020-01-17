@@ -6,6 +6,7 @@
 //Global variables
 var canvas, output, createButton, fileName, opmodeName;
 var ctx, width, height;
+var snapTo = 'y';
 var background = new Image()
 var nodes = [];
 
@@ -48,7 +49,7 @@ $(document).ready(function(){
   var didStartPath = false;
   var createMode = true;
   var isMovingNode = false;
-  var shiftDown = false;
+  var isShiftDown = false;
 
   //Handle keyboard events
   canvas.addEventListener('keydown', function(e){
@@ -81,7 +82,7 @@ $(document).ready(function(){
         return;
         break;
       case 'Shift':
-        shiftDown = true;
+        isShiftDown = true;
         return;
         break;
       case 'Backspace':
@@ -119,22 +120,18 @@ $(document).ready(function(){
   });
   canvas.addEventListener('keyup', function(e){
     if (e.key !== 'Shift') return;
-    shiftDown = false;
+    isShiftDown = false;
   });
 
   //Handle mouse events
   canvas.addEventListener('click', function(e){
     if (!createMode) return;
 
-    //Get mouse coordinates according to top left of canvas
-    var x = e.pageX - canvas.offsetLeft;
-    var y = e.pageY - canvas.offsetTop;
-
-    let n = new Node(ctx, x, y);
-    if (nodes.length <= 0) n.color = GREEN;
-    nodes.push(n);
+    let node = new Node(ctx, mouseX, mouseY);
+    if (nodes.length <= 0) node.color = GREEN;
+    nodes.push(node);
     if (didStartPath){
-      nodes[nodes.length - 2].nextNode = n;
+      nodes[nodes.length - 2].nextNode = node;
     }
 
     didStartPath = true;
@@ -174,12 +171,26 @@ $(document).ready(function(){
     mouseX = x;
     mouseY = y;
 
+    //Snap to closest axis
+    if (isShiftDown && nodes.length > 0 && createMode){
+      let n = nodes[nodes.length - 1];
+      let deltaX = Math.abs(mouseX - n.x);
+      let deltaY = Math.abs(mouseY - n.y);
+      let theta = Math.atan(deltaY / deltaX) * (180 / Math.PI);
+      if (theta <= 45){
+        mouseY = n.y;
+        snapTo = 'x';
+      } else {
+        mouseX = n.x;
+        snapTo = 'y';
+      }
+    }
+
     if (createMode || !isMovingNode || typeof selectedNode === 'undefined' || !selectedNode) return;
 
     //Click and drag
     selectedNode.x = x;
     selectedNode.y = y;
-
   });
 
   //Main draw loop
@@ -187,13 +198,48 @@ $(document).ready(function(){
     ctx.drawImage(background, 0, 0);
 
     if (createMode){
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, 9, 0, 2 * Math.PI, false);
-      ctx.fillStyle = GREY;
-      ctx.fill();
-      ctx.stroke();
+      if (isShiftDown && nodes.length > 0){
+        let node = nodes[nodes.length - 1];
+        ctx.strokeStyle = '#d1d132';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.setLineDash([10, 10]);
+        ctx.moveTo(node.x, node.y);
+        if (snapTo === 'y'){
+          ctx.lineTo(node.x, node.y + 600);
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(node.x, node.y - 600)
+          ctx.stroke();
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(node.x, mouseY, 9, 0, 2 * Math.PI, false);
+          ctx.fillStyle = GREY;
+          ctx.fill();
+          ctx.stroke();
+        }else{
+          ctx.lineTo(node.x + 600, node.y);
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(node.x - 600, node.y)
+          ctx.stroke();
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(mouseX, node.y, 9, 0, 2 * Math.PI, false);
+          ctx.fillStyle = GREY;
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }else{
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, 9, 0, 2 * Math.PI, false);
+        ctx.fillStyle = GREY;
+        ctx.fill();
+        ctx.stroke();
+      }
     }
 
     for (let node in nodes){
