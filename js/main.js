@@ -11,6 +11,7 @@ var snapTo = 'y';
 var robot;
 var background = new Image()
 var nodes = [];
+var currentAngle;
 
 //Constants
 const GREEN = '#32a852';
@@ -286,7 +287,6 @@ $(document).ready(() => {
 
   //Simulate the robot's path
   simulateButton.click(async function(){
-    robot = new Robot(ctx, nodes);
     var instructions = createFile();
     if (typeof instructions === 'undefined') return;
     instructions.pop()
@@ -320,6 +320,8 @@ function createFile(){
     return window.alert('You must provide both an OpMode name and a file name.')
   }
   var middle = '';
+  currentAngle = findDegrees(nodes[0], nodes[1]);
+  robot = new Robot(ctx, currentAngle, nodes);
 
   //Do math for nodes
   for (let n in nodes){
@@ -387,7 +389,7 @@ function decodeInstruction(i){
   instruction = instruction[0];
   instruction.replace(')', '');
   instruction = instruction.split(', ');
-  decodedInstruction.push(parseInt(instruction.shift(), 10));
-  decodedInstruction.push(parseInt(instruction.shift(), 10));
+  decodedInstruction.push(parseFloat(instruction.shift(), 10));
+  decodedInstruction.push(parseFloat(instruction.shift(), 10));
   return decodedInstruction;
 }

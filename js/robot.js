@@ -5,7 +5,7 @@
 
 class Robot {
 
-  constructor(ctx, nodes){
+  constructor(ctx, initialAngle, nodes){
     this.ctx = ctx;
     this.nodes = nodes;
     this.firstNode = nodes[0];
@@ -13,10 +13,11 @@ class Robot {
     this.size = 457.2 / this.mmPerPixel;
     this.x = this.firstNode.x - this.size / 2;
     this.y = this.firstNode.y - this.size / 2;
-    this.theta = findDegrees(this.nodes[0], this.nodes[1]);
+    this.theta = initialAngle;
 
     //Speed in pixels/frame
     let speed = .04;
+    let turnSpeed = .1;
 
     this.speed = (speed * this.mmPerPixel) / (80 / 100);
   }
@@ -35,7 +36,7 @@ class Robot {
     var initialY = this.y;
     return new Promise((resolve, reject) => {
       var id = setInterval(() => {
-        let delta = pointsOnSlope(this.x, this.y, this.theta, this.speed);
+        let delta = pointsOnSlope(this.x, this.y, this.theta, this.speed * speed);
         this.x += delta[0];
         this.y -= delta[1];
         movedDistanceX += Math.abs(delta[0]);
@@ -44,7 +45,7 @@ class Robot {
         //Keep it from overshooting node
         if (Math.sqrt(movedDistanceX * movedDistanceX + movedDistanceY * movedDistanceY) >= totalMoveDistanceNeeded){
           let finalPoint = pointsOnSlope(initialX, initialY, this.theta, totalMoveDistanceNeeded);
-          this.x = finalPoint[0] + initialX;
+          this.x = initialX + finalPoint[0];
           this.y = initialY - finalPoint[1];
           clearInterval(id);
           resolve();
@@ -54,6 +55,11 @@ class Robot {
   }
 
   turn(degrees, speed){
-    this.theta = degrees;
+  //   return new Promise((resolve, reject) => {
+  //     var id = setInterval(function () {
+  //
+  //     }, 80 / 1000);
+  //   });
+  this.theta = degrees;
   }
 }

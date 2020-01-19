@@ -1,6 +1,7 @@
 /*
  * This file contains the classes used for actions.
  */
+ 'use strict';
 
 function towRed(ctx){
   return [

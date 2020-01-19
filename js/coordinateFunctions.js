@@ -22,11 +22,11 @@ function findDegrees(n1, n2){
       if (from[1] === to[1] && from[0] < to[0]){
         degrees = 0;
       }else if (from[1] < to[1] && from[0] === to[0]){
-        degrees = 90;
+        degrees = 270;
       }else if (from[1] === to[1] && from[0] > to[0]){
         degrees = 180;
       }else if (from[1] > to[1] && from[0] === to[0]){
-        degrees = 270;
+        degrees = 90;
       }
       break;
     case 'I':
@@ -70,7 +70,7 @@ function pointsOnSlope(x, y, degrees, distance){
   //Finds new y
   newPoints[1] = distance * Math.sin(rad);
   if (degrees === 90 || degrees === 270){
-    newPoints[1] *= -1;
+    newPoints[1] *= 1;
   }
 
   //Finds new x
