@@ -4,10 +4,11 @@
 'use strict';
 
 //Global variables
-var canvas, output, createButton, fileName, opmodeName, xElem, yElem, changeMode;
+var canvas, output, createButton, simulateButton, fileName, opmodeName, xElem, yElem, changeMode;
 var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
+var robot;
 var background = new Image()
 var nodes = [];
 
@@ -22,21 +23,24 @@ const END = `        }
 }`;
 const INDENTSPACE = '            ';
 
-//Pixels per mm
-const pixelsPerMm = 0.16404199475066;
+//Milimeters / Pixels
+const mmPerPixel = 6.096;
 
 //Wait for page to load
-$(document).ready(function(){
+$(document).ready(() => {
 
   //Get elements
   canvas = document.getElementById('canvas');
   output = $('#output');
   createButton = $('#create');
+  simulateButton = $('#simulate');
   xElem = $('#x');
   yElem = $('#y');
   changeMode = $('#change-mode');
 
   towRedButton = $('#towRedButton');
+
+  robot = void(0);
 
   //Canvas setup
   ctx = canvas.getContext('2d');
@@ -114,8 +118,7 @@ $(document).ready(function(){
 
       //Exit create mode
       createMode = false;
-      for (let n in nodes){
-        let node = nodes[n];
+      for (let node of nodes){
         if (!node.hasAction){
           node.color = PURPLE;
         }else{
@@ -274,74 +277,117 @@ $(document).ready(function(){
     for (let node in nodes){
       nodes[node].draw();
     }
-  }, 60 / 1000);
+
+    if (robot) robot.draw();
+  }, 80 / 1000);
 
   //Create the file on button click
-  createButton.click(function(){
+  createButton.click(createFile);
 
-    //Get field values
-    fileName = $('#file-name').val()
-    opmodeName = $('#opmode-name').val()
-    if (fileName === '' || opmodeName === '' || !fileName || !opmodeName){
-      return window.alert('You must provide both an OpMode name and a file name.')
+  //Simulate the robot's path
+  simulateButton.click(async function(){
+    robot = new Robot(ctx, nodes);
+    var instructions = createFile();
+    if (typeof instructions === 'undefined') return;
+    instructions.pop()
+
+    //Loop through all instructions
+    for (let i of instructions){
+      var instruction = decodeInstruction(i);
+
+      if (!(['turn', 'drive'].includes(instruction[0]))) continue;
+
+      await robot[instruction[0]](instruction[1], instruction[2]);
+    }
+  });
+});
+
+//Calculates node order
+function calcOrder(){
+  for (let n = 0; n < nodes.length; n++){
+    if (n === nodes.length - 1) return;
+    nodes[n].nextNode = nodes[n + 1]
+  }
+}
+
+//Create the file
+function createFile(){
+
+  //Get field values
+  fileName = $('#file-name').val()
+  opmodeName = $('#opmode-name').val()
+  if (fileName === '' || opmodeName === '' || !fileName || !opmodeName){
+    return window.alert('You must provide both an OpMode name and a file name.')
+  }
+  var middle = '';
+
+  //Do math for nodes
+  for (let n in nodes){
+    let node = nodes[n];
+    let nextNode = node.nextNode ? node.nextNode : void(0);
+    let twoNodes = nextNode && nextNode.nextNode ? nextNode.nextNode : void(0);
+
+    //Calculate distance
+    if (nextNode && typeof nextNode !== 'undefined'){
+      let d = distance(node.x, nextNode.x, node.y, nextNode.y);
+      let neg = ' ';
+      if (d){
+        if (node.isBackwards){
+          neg += '-';
+        }
+        middle += `${INDENTSPACE}drive(${d * mmPerPixel},${neg}1.0);\n`;
+      }
     }
 
-    var middle = `${INDENTSPACE}\n${INDENTSPACE}//AUTO GENERATED CODE\n`;
-
-    //Do math for nodes
-    for (let n in nodes){
-      let node = nodes[n];
-      let nextNode = node.nextNode;
-      let twoNodes = nextNode.nextNode;
-      if (!node.nextNode) break;
-
-      //Distance
-      let x = Math.abs(node.x - nextNode.x);
-      let y = Math.abs(node.y - nextNode.y);
-      let d = Math.sqrt(x * x + y * y) / pixelsPerMm;
-
-      //Turning
-      if (!twoNodes) break;
-      x = nextNode.x - twoNodes.x;
-      y = nextNode.y - twoNodes.y;
-      let theta = Math.atan((twoNodes.x - nextNode.x) / (twoNodes.y - nextNode.y)) * (180 / Math.PI);
-
-      if (d !== 0){
-        middle += `${INDENTSPACE}drive(${d}, 1.0);\n`;
+    //Calculate angle between next node and node after
+    if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
+      let theta = findDegrees(nextNode, twoNodes);
+      if (theta && typeof theta !== 'undefined'){
+        middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
       }
-      if (node.hasAction){
-        middle += `${INDENTSPACE}${node.action}\n`;
-      }
-      middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
     }
 
-    //Add begining of file
-    var begining = `package org.firstinspires.ftc.teamcode;
+    //Run any actions
+    if (node && typeof node !== 'undefined' && node.hasAction){
+      middle += `${INDENTSPACE}${node.action}\n`;
+    }
+  }
+
+  //Add begining of file
+  var begining = `package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name="${fileName}")
 public class ${opmodeName} extends SPQRLinearOpMode {
 
-    @Override
-    public void runOpMode() {
-        this.hardwareInit();
+  @Override
+  public void runOpMode() {
+      this.hardwareInit();
 
-        waitForStart();
+      waitForStart();
 
-        if (opModeIsActive() && !isStopRequested()) {
+      if (opModeIsActive() && !isStopRequested()) {
+
+        //AUTO GENERATED CODE
 `;
 
-    output.val(begining + middle + END)
-    output.height($("textarea")[0].scrollHeight);
-    document.getElementById("output").scrollIntoView()
-  });
+  output.val(begining + middle + END)
+  output.height($("textarea")[0].scrollHeight);
+  return middle.split('\n');
+}
 
-  //Calculates node order
-  function calcOrder(){
-    for (let n = 0; n < nodes.length; n++){
-      if (n === nodes.length - 1) return;
-      nodes[n].nextNode = nodes[n + 1]
-    }
-  }
-});
+//Decode an instruction from the file
+function decodeInstruction(i){
+  var instruction = i.trim();
+  instruction = instruction.replace(';', '');
+  var decodedInstruction = [];
+  instruction = instruction.split('(');
+  decodedInstruction.push(instruction.shift());
+  instruction = instruction[0];
+  instruction.replace(')', '');
+  instruction = instruction.split(', ');
+  decodedInstruction.push(parseInt(instruction.shift(), 10));
+  decodedInstruction.push(parseInt(instruction.shift(), 10));
+  return decodedInstruction;
+}

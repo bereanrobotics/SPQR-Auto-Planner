@@ -4,8 +4,8 @@
 
 class ActionNode extends Node {
 
-  constructor(ctx, x, y, action){
-    super(ctx, x, y);
+  constructor(ctx, x, y, action, goBackwards){
+    super(ctx, x, y, goBackwards);
     this.color = '#ed9924';
     this.hasAction = true;
     this.action = action;
