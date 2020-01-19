@@ -10,14 +10,16 @@ class Robot {
     this.nodes = nodes;
     this.firstNode = nodes[0];
     this.mmPerPixel = 6.096;
-    this.size = 457.2 / this.mmPerPixel;
+    this.size = 457.2 / this.mmPerPixel; //Pixels
     this.x = this.firstNode.x - this.size / 2;
     this.y = this.firstNode.y - this.size / 2;
     this.theta = initialAngle;
 
     //Speed in pixels/frame
     let speed = .04;
-    let turnSpeed = .1;
+
+    //Turning speed in degrees/frame
+    this.turnSpeed = .1;
 
     this.speed = (speed * this.mmPerPixel) / (80 / 100);
   }
@@ -36,17 +38,17 @@ class Robot {
     var initialY = this.y;
     return new Promise((resolve, reject) => {
       var id = setInterval(() => {
-        let delta = pointsOnSlope(this.x, this.y, this.theta, this.speed * speed);
+        let delta = findPoint(new Node(void(0), this.x, this.y), this.theta, this.speed * speed);
         this.x += delta[0];
-        this.y -= delta[1];
+        this.y += delta[1];
         movedDistanceX += Math.abs(delta[0]);
         movedDistanceY += Math.abs(delta[1]);
 
         //Keep it from overshooting node
         if (Math.sqrt(movedDistanceX * movedDistanceX + movedDistanceY * movedDistanceY) >= totalMoveDistanceNeeded){
-          let finalPoint = pointsOnSlope(initialX, initialY, this.theta, totalMoveDistanceNeeded);
+          let finalPoint = findPoint(new Node(void(0), initialX, initialY, false), this.theta, totalMoveDistanceNeeded);
           this.x = initialX + finalPoint[0];
-          this.y = initialY - finalPoint[1];
+          this.y = initialY + finalPoint[1];
           clearInterval(id);
           resolve();
         }
@@ -55,11 +57,6 @@ class Robot {
   }
 
   turn(degrees, speed){
-  //   return new Promise((resolve, reject) => {
-  //     var id = setInterval(function () {
-  //
-  //     }, 80 / 1000);
-  //   });
-  this.theta = degrees;
+    this.theta -= degrees;
   }
 }

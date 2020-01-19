@@ -343,7 +343,8 @@ function createFile(){
 
     //Calculate angle between next node and node after
     if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
-      let theta = findDegrees(nextNode, twoNodes);
+      let theta = currentAngle - findDegrees(nextNode, twoNodes);
+      currentAngle += theta;
       if (theta && typeof theta !== 'undefined'){
         middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
       }
