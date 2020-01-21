@@ -30,9 +30,10 @@ class Robot {
     this.ctx.save();
     this.ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
     this.ctx.rotate(this.theta * Math.PI / 180);
-    this.ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size);
     this.ctx.fillStyle = '#8a8a8a';
-    this.ctx.fill();
+    this.ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+    this.ctx.fillStyle = '#00ff34';
+    this.ctx.fillRect(this.size / 2 - 20, -this.size / 2, 20, this.size);
     this.ctx.restore();
   }
 
@@ -63,6 +64,25 @@ class Robot {
   }
 
   turn(degrees, speed){
-    this.theta -= degrees;
+    return new Promise((resolve, reject) => {
+      var finalAngle = this.theta - degrees;
+      var neededTurnDistance = Math.abs(this.theta - finalAngle);
+      var distanceTurned = 0;
+      var id = setInterval(() => {
+        let turn = this.turnSpeed * speed;
+        if (degrees < 0){
+          turn *= -1;
+        }
+        this.theta -= turn;
+        distanceTurned += Math.abs(turn);
+
+        //Prevent turning too far
+        if (distanceTurned >= neededTurnDistance){
+          this.theta = finalAngle;
+          clearInterval(id);
+          resolve();
+        }
+      }, 80 / 1000);
+    });
   }
 }

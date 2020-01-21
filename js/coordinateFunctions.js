@@ -16,9 +16,6 @@ function findPoint(node, degrees, distance){
 
   if ([90, 270].includes(degrees)){
     deltaPoints[1] = distance;
-    if (degrees === 90){
-      deltaPoints[1] *= -1;
-    }
     return deltaPoints;
   }
 
