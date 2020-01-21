@@ -332,20 +332,16 @@ function createFile(){
     //Calculate distance
     if (nextNode && typeof nextNode !== 'undefined'){
       let d = distance(node.x, nextNode.x, node.y, nextNode.y);
-      let neg = ' ';
       if (d){
-        if (node.isBackwards){
-          neg += '-';
-        }
-        middle += `${INDENTSPACE}drive(${d * mmPerPixel},${neg}1.0);\n`;
+        middle += `${INDENTSPACE}drive(${d * mmPerPixel}, 1.0);\n`;
       }
     }
 
     //Calculate angle between next node and node after
     if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
       let theta = currentAngle - findDegrees(nextNode, twoNodes);
-      currentAngle += theta;
       if (theta && typeof theta !== 'undefined'){
+        currentAngle -= theta;
         middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
       }
     }

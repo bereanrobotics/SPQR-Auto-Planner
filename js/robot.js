@@ -25,9 +25,15 @@ class Robot {
   }
 
   draw(){
+
+    //Rotate rectangle
+    this.ctx.save();
+    this.ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
+    this.ctx.rotate(this.theta * Math.PI / 180);
+    this.ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size);
     this.ctx.fillStyle = '#8a8a8a';
-    this.ctx.rect(this.x, this.y, this.size, this.size);
     this.ctx.fill();
+    this.ctx.restore();
   }
 
   drive(d, speed){

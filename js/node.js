@@ -6,15 +6,10 @@
 
 class Node {
 
-  constructor(ctx, x, y, goBackwards){
+  constructor(ctx, x, y){
     this.ctx = ctx;
     this.x = x;
     this.y = y;
-    if (!goBackwards){
-      this.goBackwards = false;
-    }else{
-      this.goBackwards = true;
-    }
     this.color = '#cfcfcf';
     this.radius = 9;
     this.nextNode = void(0);
