@@ -14,6 +14,7 @@ class Node {
     this.radius = 9;
     this.nextNode = void(0);
     this.hasAction = false;
+    this.outlineColor= '#000';
   }
 
   draw(){
@@ -25,6 +26,7 @@ class Node {
       this.ctx.lineTo(this.nextNode.x, this.nextNode.y);
       this.ctx.stroke()
     }
+    this.ctx.strokeStyle = this.outlineColor;
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
     this.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);

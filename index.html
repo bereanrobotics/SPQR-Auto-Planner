@@ -28,6 +28,11 @@
           <h3>Coordinates:</h3>
           <p><b>X: </b><span id="x">0</span> <b>Y: </b><span id="y">0</span></p>
           <hr>
+          <h3>Edit node:</h3>
+          <div id="edit-node">
+            <p>No node selected</p>
+          </div>
+          <hr>
           <h3>Switch modes:</h3>
           <p>You're currently in <b><span id="mode-display">create</span></b> mode.</p>
           <button type="button" id="change-mode">Change mode</button>
@@ -53,11 +58,11 @@
           <br>
           <br>
           <b class="option-item">Simulation movement speed (<span id="move-speed-display">0.04</span>):</b>
-          <input type="range" id="move-speed" class="option-item" min="0.03" max="0.05" value="0.04" step="0.00025">
+          <input type="range" id="move-speed" class="option-item" min="0.01" max="0.07" value="0.04" step="0.00025" oninput="changeMoveSpeed(this.value)" onchange="changeMoveSpeed(this.value)">
           <br>
           <br>
           <b class="option-item">Simulation turn speed (<span id="turn-speed-display">0.1</span>):</b>
-          <input type="range" id="turn-speed" class="option-item" min="0.1" max="0.9" value="0.1" step="0.05">
+          <input type="range" id="turn-speed" class="option-item" min="0.1" max="0.9" value="0.1" step="0.05" oninput="changeTurnSpeed(this.value)" onchange="changeTurnSpeed(this.value)">
           <br>
           <br>
           <button type="button" id="create">Create</button>

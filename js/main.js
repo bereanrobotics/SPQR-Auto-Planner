@@ -141,19 +141,23 @@ $(document).ready(() => {
 
   //Handle mouse events
   canvas.addEventListener('click', function(e){
-    if (!createMode) return;
-    if (mouseX > 600 || mouseX < 0 || mouseY > 600 || mouseY < 0) return;
+    if (createMode){
+      if (mouseX > 600 || mouseX < 0 || mouseY > 600 || mouseY < 0) return;
 
-    let node = new Node(ctx, mouseX, mouseY);
-    if (nodes.length <= 0) node.color = GREEN;
-    nodes.push(node);
-    if (didStartPath){
-      nodes[nodes.length - 2].nextNode = node;
+      //Create node
+      let node = new Node(ctx, mouseX, mouseY);
+      if (nodes.length <= 0) node.color = GREEN;
+      nodes.push(node);
+      if (didStartPath){
+        nodes[nodes.length - 2].nextNode = node;
+      }
+
+      didStartPath = true;
     }
-
-    didStartPath = true;
   });
   canvas.addEventListener('mousedown', function(e){
+
+    //Make sure it is in edit mode before editing
     if (createMode) return;
 
     //Get mouse coordinates according to top left of canvas
@@ -168,7 +172,13 @@ $(document).ready(() => {
       let deltaX = x - node.x;
       let deltaY = y - node.y;
       if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) <= node.radius){
+
+        //Select node
+        if (selectedNode && typeof selectedNode !== 'undefined'){
+            selectedNode.outlineColor = '#000';
+        }
         selectedNode = node;
+        selectedNode.outlineColor = '#14dbdb';
         node.x = x;
         node.y = y;
         isMovingNode = true;
@@ -301,6 +311,7 @@ $(document).ready(() => {
     }
   });
 
+  //Load token into project
   loadToken.click(function(){
     if (nodes.length > 0){
       if (!window.confirm('You already have nodes in the project, would you like to overwrite them?')) return;
@@ -309,25 +320,23 @@ $(document).ready(() => {
     nodes = decodeNodeToken(tokenField.val(), ctx);
     calcOrder();
   });
-
-  //Change robot speeds
-  moveSpeed.on('change mousemove', function(){
-    if (robot && typeof robot != 'undefined'){
-      let val = $(this).val()
-      robot.speed = (val * mmPerPixel) / (80 / 100);
-      moveSpeed.text(val);
-    }
-  });
-  turnSpeed.on('change mousemove', function(){
-    if (robot && typeof robot != 'undefined'){
-      let val = $(this).val()
-      robot.turnSpeed = val;
-      turnSpeed.text(val);
-    }
-  });
 });
 
-//Calculates node order
+//Change robot speeds
+function changeMoveSpeed(value){
+  if (robot && typeof robot != 'undefined'){
+    robot.speed = (value * mmPerPixel) / (80 / 100);
+  }
+  moveSpeedDisplay.text(value);
+}
+function changeTurnSpeed(value){
+  if (robot && typeof robot != 'undefined'){
+    robot.turnSpeed = value;
+  }
+  turnSpeedDisplay.text(value);
+}
+
+//Calculates node order and connects them
 function calcOrder(){
   for (let n = 0; n < nodes.length; n++){
     if (n === nodes.length - 1) return;
@@ -346,7 +355,11 @@ function createFile(){
   }
   var middle = '', token = '';
   currentAngle = findDegrees(nodes[0], nodes[1]);
+
+  //Initialize robot
   robot = new Robot(ctx, currentAngle, nodes);
+  robot.speed = (moveSpeed.val() * mmPerPixel) / (80 / 100);
+  robot.turnSpeed = turnSpeed.val();
 
   //Do math for nodes
   for (let n in nodes){
@@ -358,7 +371,7 @@ function createFile(){
     if (nextNode && typeof nextNode !== 'undefined'){
       let d = distance(node.x, nextNode.x, node.y, nextNode.y);
       if (d){
-        middle += `${INDENTSPACE}drive(${d * mmPerPixel * 10}, 1.0);\n`; //Times 10 to account for Owen's factor issue
+        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, 1.0);\n`; //Times 10 to account for Owen's factor issue
       }
     }
 
@@ -367,7 +380,7 @@ function createFile(){
       let theta = currentAngle - findDegrees(nextNode, twoNodes);
       if (theta && typeof theta !== 'undefined'){
         currentAngle -= theta;
-        middle += `${INDENTSPACE}turn(${theta}, 1.0);\n`;
+        middle += `${INDENTSPACE}this.turn(${theta}, 1.0);\n`;
       }
     }
 
@@ -454,6 +467,7 @@ function color(createMode){
 function decodeInstruction(i){
   var instruction = i.trim();
   instruction = instruction.replace(';', '');
+  instruction = instruction.replace('this.', '');
   var decodedInstruction = [];
   instruction = instruction.split('(');
   decodedInstruction.push(instruction.shift());
