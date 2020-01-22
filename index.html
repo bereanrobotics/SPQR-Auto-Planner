@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/site.css">
     <title>SPQR Autonomous Planner</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="js/coordinateFunctions.js" charset="utf-8"></script>
     <script src="js/node.js" charset="utf-8"></script>
@@ -14,20 +16,35 @@
     <script src="js/main.js" charset="utf-8"></script>
   </head>
   <body>
-    <div id="wrapper" class="center">
+    <noscript>
+        Your browser must support JavaScript.
+    </noscript>
+    <div id="wrapper" class="center one-px-border">
       <div class="text-center">
         <h1>SPQR Autonomous Planner</h1>
       </div>
-      <canvas id="canvas" width="600" height="600" class="center" tabindex="1"></canvas>
-      <div id="output-wrapper" class="center">
-        <p><b>X: </b><span id="x">0</span> <b>Y: </b><span id="y">0</span></p>
-        <button type="button" id="change-mode">Change mode</button>
-        <div class="center" id="actions">
+      <div id="canvas-wrapper" class="center">
+        <div id="canvas-left">
+          <h3>Coordinates:</h3>
+          <p><b>X: </b><span id="x">0</span> <b>Y: </b><span id="y">0</span></p>
+          <hr>
+          <h3>Switch modes:</h3>
+          <p>You're currently in <b><span id="mode-display">create</span></b> mode.</p>
+          <button type="button" id="change-mode">Change mode</button>
+          <hr>
           <h3>Actions:</h3>
           <button type="button" class="action" id="towRedButton">Tow Red</button>
+          <hr>
+          <h3>Token:</h3>
+          <input type="text" id="token-field" placeholder="Token" value="">
+          <button type="button" id="load-token">Load token</button>
         </div>
+        <canvas id="canvas" width="600" height="600" class="center one-px-border canvas-section-item" tabindex="1"></canvas>
+      </div>
+
+      <div id="bottom-wrapper" class="center">
         <h3>Options:</h3>
-        <div id="options-wrapper">
+        <div id="options-wrapper" class="one-px-border">
           <b class="option-item">File name:&nbsp;</b>
           <input type="text" id="file-name" class="option-item" placeholder="File name" value="">
           <br>
@@ -40,11 +57,8 @@
           <button type="button" id="simulate">Simulate</button>
         </div>
         <h3>Output:</h3>
-        <textarea id="output" rows="1" cols="100" readonly></textarea>
+        <textarea id="output" class="one-px-border" rows="1" cols="100" readonly></textarea>
       </div>
     </div>
-    <noscript>
-        Your browser must support JavaScript.
-    </noscript>
   </body>
 </html>

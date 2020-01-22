@@ -4,7 +4,7 @@
 'use strict';
 
 //Global variables
-var canvas, output, createButton, simulateButton, fileName, opModeName, xElem, yElem, changeMode;
+var wrapper, canvas, output, createButton, simulateButton, fileName, opModeName, xElem, yElem, changeMode, modeDisplay, tokenField, loadToken;
 var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
@@ -32,16 +32,25 @@ $(document).ready(() => {
 
   //Get elements
   canvas = document.getElementById('canvas');
+  wrapper = $('#wrapper');
   output = $('#output');
   createButton = $('#create');
   simulateButton = $('#simulate');
   xElem = $('#x');
   yElem = $('#y');
   changeMode = $('#change-mode');
+  modeDisplay = $('#mode-display');
+  tokenField = $('#token-field');
+  loadToken = $('#load-token')
 
+  //Get action buttons
   towRedButton = $('#towRedButton');
 
+  //Create empty robot
   robot = void(0);
+
+  //Load page
+  wrapper.css('display', 'inherit');
 
   //Canvas setup
   ctx = canvas.getContext('2d');
@@ -112,36 +121,16 @@ $(document).ready(() => {
     isShiftDown = false;
   });
 
+  //Change mode based on button click
   changeMode.click(function(){
 
-    //Check if user is creating nodes
+    //Check if user is creating nodes and switch
     if (createMode){
-
-      //Exit create mode
       createMode = false;
-      for (let node of nodes){
-        if (!node.hasAction){
-          node.color = PURPLE;
-        }else{
-          node.color = ORANGE;
-        }
-      }
-      nodes[0].color = GREEN;
-      nodes[nodes.length - 1].color = RED;
-    } else {
-
-      //Start create mode
+      color(createMode);
+    }else{
       createMode = true;
-      for (let n in nodes){
-        if (n === 0) continue;
-        let node = nodes[n];
-        if (!node.hasAction){
-          node.color = GREY;
-        }else{
-          node.color = ORANGE;
-        }
-      }
-      nodes[0].color = GREEN;
+      color(createMode);
     }
   });
 
@@ -281,10 +270,10 @@ $(document).ready(() => {
     }
 
     //Draw all nodes
+    color(createMode);
     for (let node of nodes){
       node.draw();
     }
-
     if (robot) robot.draw();
   }, 80 / 1000);
 
@@ -306,6 +295,15 @@ $(document).ready(() => {
       await robot[instruction[0]](instruction[1], instruction[2]);
     }
   });
+
+  loadToken.click(function(){
+    if (nodes.length > 0){
+      if (!window.confirm('You already have nodes in the project, would you like to overwrite them?')) return;
+    }
+    nodes = [];
+    nodes = decodeNodeToken(tokenField.val(), ctx);
+    calcOrder();
+  });
 });
 
 //Calculates node order
@@ -325,7 +323,7 @@ function createFile(){
   if (fileName === '' || opModeName === '' || !fileName || !opModeName){
     return window.alert('You must provide both an OpMode name and a file name.')
   }
-  var middle = '';
+  var middle = '', token = '';
   currentAngle = findDegrees(nodes[0], nodes[1]);
   robot = new Robot(ctx, currentAngle, nodes);
 
@@ -358,6 +356,15 @@ function createFile(){
     }
   }
 
+  //Create token
+  for (let node of nodes){
+    token += createNodeTokenPart(node);
+  }
+
+  let t = token.split('#');
+  t.pop();
+  token = t.join('#');
+
   //Add begining of file
   var begining = `package org.firstinspires.ftc.teamcode;
 
@@ -375,11 +382,51 @@ public class ${fileName} extends SPQRLinearOpMode {
       if (opModeIsActive() && !isStopRequested()) {
 
 ${INDENTSPACE}//AUTO GENERATED CODE
+${INDENTSPACE}//TOKEN: ${btoa(token)}
 `;
 
   output.val(begining + middle + END)
   output.height($("textarea")[0].scrollHeight);
   return middle.split('\n');
+}
+
+//Color the nodes
+function color(createMode){
+
+  if (nodes.length <= 0) return;
+
+  //Check if user is creating nodes
+  if (!createMode){
+
+    modeDisplay.text('edit');
+
+    //Color edit mode
+    for (let node of nodes){
+      if (!node.hasAction){
+        node.color = PURPLE;
+      }else{
+        node.color = ORANGE;
+      }
+    }
+    nodes[0].color = GREEN;
+    nodes[nodes.length - 1].color = RED;
+  }else{
+
+    modeDisplay.text('create');
+
+    //Color create mode
+    for (let n in nodes){
+      if (n === 0) continue;
+      let node = nodes[n];
+      if (!node.hasAction){
+        node.color = GREY;
+      }else{
+        node.color = ORANGE;
+      }
+    }
+    nodes[0].color = GREEN;
+  }
+
 }
 
 //Decode an instruction from the file
@@ -395,4 +442,25 @@ function decodeInstruction(i){
   decodedInstruction.push(parseFloat(instruction.shift(), 10));
   decodedInstruction.push(parseFloat(instruction.shift(), 10));
   return decodedInstruction;
+}
+
+//Create node token
+function createNodeTokenPart(node){
+  return `${node.x}~${node.y}${(node.hasAction) ? `~${node.action}` : ''}#`;
+}
+
+//Decode node token
+function decodeNodeToken(token, ctx){
+  let decodedToken = atob(token);
+  var nodeArray = [];
+  let nodeTokenPart = decodedToken.split('#');
+  for (let tokenPart of nodeTokenPart){
+    let nodeComponents = tokenPart.split('~');
+    if (nodeComponents.length === 3){
+      nodeArray.push(new ActionNode(ctx, parseInt(nodeComponents[0], 10), parseInt(nodeComponents[1], 10), nodeComponents[2]));
+    }else{
+      nodeArray.push(new Node(ctx, parseInt(nodeComponents[0], 10), parseInt(nodeComponents[1], 10)));
+    }
+  }
+  return nodeArray;
 }
