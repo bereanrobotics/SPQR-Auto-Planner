@@ -175,10 +175,13 @@ $(document).ready(() => {
 
         //Select node
         if (selectedNode && typeof selectedNode !== 'undefined'){
-            selectedNode.outlineColor = '#000';
+          selectedNode.outlineColor = '#000';
+        }else{
+          displayEditor();
         }
         selectedNode = node;
         selectedNode.outlineColor = '#14dbdb';
+        loadNode(selectedNode);
         node.x = x;
         node.y = y;
         isMovingNode = true;
@@ -460,7 +463,6 @@ function color(createMode){
     }
     nodes[0].color = GREEN;
   }
-
 }
 
 //Decode an instruction from the file
