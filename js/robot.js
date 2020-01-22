@@ -19,7 +19,7 @@ class Robot {
     let speed = .04;
 
     //Turning speed in degrees/frame
-    this.turnSpeed = .1;
+    this.turnSpeed = .5;
 
     this.speed = (speed * this.mmPerPixel) / (80 / 100);
   }

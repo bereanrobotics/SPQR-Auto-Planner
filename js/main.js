@@ -264,19 +264,25 @@ $(document).ready(() => {
         }
         ctx.setLineDash([]);
       }else{
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(mouseX, mouseY, 9, 0, 2 * Math.PI, false);
-        ctx.fillStyle = GREY;
-        ctx.fill();
-        ctx.stroke();
+        if (nodes[0] && typeof nodes[0] !== undefined){
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(mouseX, mouseY, 9, 0, 2 * Math.PI, false);
+          ctx.fillStyle = GREY;
+          ctx.fill();
+          ctx.stroke();
+        }else{
+          ctx.strokeStyle = '#0f0';
+          let size = 457.2 / mmPerPixel;
+          ctx.strokeRect(mouseX - size / 2, mouseY - size / 2, size, size);
+        }
       }
     }
 
     //Draw all nodes
-    for (let node in nodes){
-      nodes[node].draw();
+    for (let node of nodes){
+      node.draw();
     }
 
     if (robot) robot.draw();
@@ -357,8 +363,8 @@ function createFile(){
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name="${fileName}")
-public class ${opmodeName} extends SPQRLinearOpMode {
+@Autonomous(name="${opmodeName}")
+public class ${fileName} extends SPQRLinearOpMode {
 
   @Override
   public void runOpMode() {
@@ -368,7 +374,7 @@ public class ${opmodeName} extends SPQRLinearOpMode {
 
       if (opModeIsActive() && !isStopRequested()) {
 
-        //AUTO GENERATED CODE
+          //AUTO GENERATED CODE
 `;
 
   output.val(begining + middle + END)
