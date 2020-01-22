@@ -64,15 +64,21 @@ class Robot {
   }
 
   turn(degrees, speed){
+    if (degrees > 180){
+      degrees -= 360;
+    }
+    if (degrees < -180){
+      degrees += 360;
+    }
     return new Promise((resolve, reject) => {
       var finalAngle = this.theta - degrees;
       var neededTurnDistance = Math.abs(this.theta - finalAngle);
       var distanceTurned = 0;
+      let turn = this.turnSpeed * speed;
+      if (degrees < 0){
+        turn *= -1;
+      }
       var id = setInterval(() => {
-        let turn = this.turnSpeed * speed;
-        if (degrees < 0){
-          turn *= -1;
-        }
         this.theta -= turn;
         distanceTurned += Math.abs(turn);
 

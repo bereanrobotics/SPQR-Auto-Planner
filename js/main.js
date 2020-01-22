@@ -358,7 +358,7 @@ function createFile(){
     if (nextNode && typeof nextNode !== 'undefined'){
       let d = distance(node.x, nextNode.x, node.y, nextNode.y);
       if (d){
-        middle += `${INDENTSPACE}drive(${d * mmPerPixel * 10}, 1.0);\n`;
+        middle += `${INDENTSPACE}drive(${d * mmPerPixel * 10}, 1.0);\n`; //Times 10 to account for Owen's factor issue
       }
     }
 
