@@ -6,6 +6,12 @@ html, body {
   height: auto;
 }
 
+/* Setup footer */
+footer {
+  margin-top: 10px;
+  font-size: 10pt;
+}
+
 /* Ids */
 #wrapper {
   width: 90vw;

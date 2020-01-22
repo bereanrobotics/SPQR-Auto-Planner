@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/site.css">
     <title>SPQR Autonomous Planner</title>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="js/coordinateFunctions.js" charset="utf-8"></script>
     <script src="js/node.js" charset="utf-8"></script>
@@ -41,16 +41,23 @@
         </div>
         <canvas id="canvas" width="600" height="600" class="center one-px-border canvas-section-item" tabindex="1"></canvas>
       </div>
-
       <div id="bottom-wrapper" class="center">
         <h3>Options:</h3>
         <div id="options-wrapper" class="one-px-border">
-          <b class="option-item">File name:&nbsp;</b>
+          <b class="option-item">File name:</b>
           <input type="text" id="file-name" class="option-item" placeholder="File name" value="">
           <br>
           <br>
-          <b class="option-item">OpMode name:&nbsp;</b>
+          <b class="option-item">OpMode name:</b>
           <input type="text" id="opmode-name" class="option-item" placeholder="OpMode name" value="">
+          <br>
+          <br>
+          <b class="option-item">Simulation movement speed (<span id="move-speed-display">0.04</span>):</b>
+          <input type="range" id="move-speed" class="option-item" min="0.03" max="0.05" value="0.04" step="0.00025">
+          <br>
+          <br>
+          <b class="option-item">Simulation turn speed (<span id="turn-speed-display">0.1</span>):</b>
+          <input type="range" id="turn-speed" class="option-item" min="0.1" max="0.9" value="0.1" step="0.05">
           <br>
           <br>
           <button type="button" id="create">Create</button>
@@ -60,5 +67,6 @@
         <textarea id="output" class="one-px-border" rows="1" cols="100" readonly></textarea>
       </div>
     </div>
+    <footer>&copy;2020 SPQR. Located at <a href="https://bereanchristian.com">Berean Christian High School.</a></footer>
   </body>
 </html>

@@ -4,7 +4,8 @@
 'use strict';
 
 //Global variables
-var wrapper, canvas, output, createButton, simulateButton, fileName, opModeName, xElem, yElem, changeMode, modeDisplay, tokenField, loadToken;
+var wrapper, canvas, output, moveSpeed, turnSpeed, moveSpeedDisplay, turnSpeedDisplay, createButton, simulateButton, xElem, yElem, changeMode, modeDisplay, tokenField, loadToken;
+var fileName, opModeName;
 var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
@@ -34,6 +35,10 @@ $(document).ready(() => {
   canvas = document.getElementById('canvas');
   wrapper = $('#wrapper');
   output = $('#output');
+  moveSpeed = $('#move-speed');
+  turnSpeed = $('#turn-speed');
+  moveSpeedDisplay = $('#move-speed-display');
+  turnSpeedDisplay = $('#turn-speed-display');
   createButton = $('#create');
   simulateButton = $('#simulate');
   xElem = $('#x');
@@ -303,6 +308,22 @@ $(document).ready(() => {
     nodes = [];
     nodes = decodeNodeToken(tokenField.val(), ctx);
     calcOrder();
+  });
+
+  //Change robot speeds
+  moveSpeed.on('change mousemove', function(){
+    if (robot && typeof robot != 'undefined'){
+      let val = $(this).val()
+      robot.speed = (val * mmPerPixel) / (80 / 100);
+      moveSpeed.text(val);
+    }
+  });
+  turnSpeed.on('change mousemove', function(){
+    if (robot && typeof robot != 'undefined'){
+      let val = $(this).val()
+      robot.turnSpeed = val;
+      turnSpeed.text(val);
+    }
   });
 });
 
