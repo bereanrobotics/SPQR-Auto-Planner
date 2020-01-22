@@ -38,7 +38,7 @@ class Robot {
   }
 
   drive(d, speed){
-    var totalMoveDistanceNeeded = d / this.mmPerPixel; //Pixels
+    var totalMoveDistanceNeeded = (d / 10) / this.mmPerPixel; //Pixels
     var movedDistanceX = 0;
     var movedDistanceY = 0;
     var initialX = this.x;

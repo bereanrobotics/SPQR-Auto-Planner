@@ -4,7 +4,7 @@
 'use strict';
 
 //Global variables
-var canvas, output, createButton, simulateButton, fileName, opmodeName, xElem, yElem, changeMode;
+var canvas, output, createButton, simulateButton, fileName, opModeName, xElem, yElem, changeMode;
 var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
@@ -321,8 +321,8 @@ function createFile(){
 
   //Get field values
   fileName = $('#file-name').val()
-  opmodeName = $('#opmode-name').val()
-  if (fileName === '' || opmodeName === '' || !fileName || !opmodeName){
+  opModeName = $('#opmode-name').val()
+  if (fileName === '' || opModeName === '' || !fileName || !opModeName){
     return window.alert('You must provide both an OpMode name and a file name.')
   }
   var middle = '';
@@ -363,7 +363,7 @@ function createFile(){
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name="${opmodeName}")
+@Autonomous(name="${opModeName}")
 public class ${fileName} extends SPQRLinearOpMode {
 
   @Override
@@ -374,7 +374,7 @@ public class ${fileName} extends SPQRLinearOpMode {
 
       if (opModeIsActive() && !isStopRequested()) {
 
-          //AUTO GENERATED CODE
+${INDENTSPACE}//AUTO GENERATED CODE
 `;
 
   output.val(begining + middle + END)
