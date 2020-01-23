@@ -1,6 +1,7 @@
 /*
  * This file contains display and update functions for the editor.
  */
+'use strict';
 
 const BLANKEDITHTML = `<b class="option-item">X:</b>
 <input type="number" id="node-x" class="option-item" placeholder="X" value="" min="0" max="600" oninput="changeNodeX(this.value)" onchange="changeNodeX(this.value)">
@@ -11,7 +12,7 @@ const BLANKEDITHTML = `<b class="option-item">X:</b>
 <br>
 <br>
 <b class="option-item">Speed to next node:</b>
-<input type="number" id="node-speed" class="option-item" placeholder="Speed" value="" min="-1.0" max="1.0" step=".05">
+<input type="number" id="node-speed" class="option-item" placeholder="Speed" value="" min="-1.0" max="1.0" step=".05" oninput="changeNodeSpeed(this.value)" onchange="changeNodeSpeed(this.value)">
 <br>
 <br>
 <input type="checkbox" id="node-has-action" onclick="updateAction()" class="option-item" value="">Has action</input>
@@ -120,4 +121,5 @@ function updateAction(){
     actionText.css('display', 'none');
     nodeAction.css('display', 'none');
   }
+  calcOrder();
 };

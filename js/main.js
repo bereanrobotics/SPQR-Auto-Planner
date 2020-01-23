@@ -356,10 +356,13 @@ function createFile(){
   fileName = $('#file-name').val()
   opModeName = $('#opmode-name').val()
   if (fileName === '' || opModeName === '' || !fileName || !opModeName){
-    return window.alert('You must provide both an OpMode name and a file name.')
+    return window.alert('You must provide both an OpMode name and a file name.');
   }
-  var middle = '', token = '';
+  var middle = '', token = `${$('#file-name').val()}<>${$('#opmode-name').val()}#<$>#`;
   currentAngle = findDegrees(nodes[0], nodes[1]);
+  if (nodes[0].speedToNextNode < 0){
+    currentAngle += 180;
+  }
 
   //Initialize robot
   robot = new Robot(ctx, currentAngle, nodes);
@@ -383,6 +386,9 @@ function createFile(){
     //Calculate angle between next node and node after
     if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
       let theta = currentAngle - findDegrees(nextNode, twoNodes);
+      if (nextNode.speedToNextNode < 0){
+        theta += 180;
+      }
       if (theta && typeof theta !== 'undefined'){
         currentAngle -= theta;
         middle += `${INDENTSPACE}this.turn(${theta}, 1.0);\n`;
@@ -400,9 +406,9 @@ function createFile(){
     token += createNodeTokenPart(node);
   }
 
-  let t = token.split('#');
+  let t = token.split('#<$>#');
   t.pop();
-  token = t.join('#');
+  token = t.join('#<$>#');
 
   //Add begining of file
   var begining = `package org.firstinspires.ftc.teamcode;
@@ -484,20 +490,27 @@ function decodeInstruction(i){
 
 //Create node token
 function createNodeTokenPart(node){
-  return `${node.x}~${node.y}${(node.hasAction) ? `~${node.action}` : ''}#`;
+  return `${node.x}/~?~/${node.y}/~?~/${node.speedToNextNode}${(node.hasAction) ? `/~?~/${node.action}` : ''}#<$>#`;
 }
 
 //Decode node token
 function decodeNodeToken(token, ctx){
   let decodedToken = atob(token);
   var nodeArray = [];
-  let nodeTokenPart = decodedToken.split('#');
+  let nodeTokenPart = decodedToken.split('#<$>#');
+  let names = nodeTokenPart.shift().split('<>');
+  $('#file-name').val(names.shift());
+  $('#opmode-name').val(names.shift());
   for (let tokenPart of nodeTokenPart){
-    let nodeComponents = tokenPart.split('~');
-    if (nodeComponents.length === 3){
-      nodeArray.push(new ActionNode(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10), nodeComponents[2]));
+    let nodeComponents = tokenPart.split('/~?~/');
+    if (nodeComponents.length === 4){
+      let newNode = new ActionNode(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10), nodeComponents[3]);
+      newNode.speedToNextNode = nodeComponents[2];
+      nodeArray.push();
     }else{
-      nodeArray.push(new Node(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10)));
+      let newNode = new Node(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10));
+      newNode.speedToNextNode = nodeComponents[2];
+      nodeArray.push(newNode);
     }
   }
   return nodeArray;
