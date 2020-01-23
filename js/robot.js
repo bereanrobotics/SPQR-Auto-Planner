@@ -60,7 +60,7 @@ class Robot {
           clearInterval(id);
           resolve();
         }
-      }, 80 / 1000);
+      }, 1000 / 60);
     });
   }
 
@@ -92,7 +92,7 @@ class Robot {
           clearInterval(id);
           resolve();
         }
-      }, 80 / 1000);
+      }, 1000 / 60);
     });
   }
 }

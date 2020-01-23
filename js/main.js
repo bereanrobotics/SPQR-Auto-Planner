@@ -4,7 +4,7 @@
 'use strict';
 
 //Global variables
-var wrapper, canvas, output, moveSpeed, turnSpeed, moveSpeedDisplay, turnSpeedDisplay, createButton, simulateButton, xElem, yElem, changeMode, modeDisplay, tokenField, loadToken;
+var wrapper, canvas, output, moveSpeed, turnSpeed, moveSpeedDisplay, turnSpeedDisplay, createButton, simulateButton, exportButton, xElem, yElem, changeMode, modeDisplay, tokenField, loadToken;
 var fileName, opModeName;
 var towRedButton;
 var ctx, width, height;
@@ -42,6 +42,7 @@ $(document).ready(() => {
   turnSpeedDisplay = $('#turn-speed-display');
   createButton = $('#create');
   simulateButton = $('#simulate');
+  exportButton = $('#export');
   xElem = $('#x');
   yElem = $('#y');
   changeMode = $('#change-mode');
@@ -295,7 +296,7 @@ $(document).ready(() => {
       node.draw();
     }
     if (robot) robot.draw();
-  }, 80 / 1000);
+  }, 1000 / 60);
 
   //Create the file on button click
   createButton.click(createFile);
@@ -314,6 +315,22 @@ $(document).ready(() => {
 
       await robot[instruction[0]](instruction[1], instruction[2]);
     }
+  });
+
+  //Export the path as an action
+  exportButton.click(function(){
+    var out = [];
+    for (let node of nodes){
+      if (node instanceof ActionNode){
+        out.push(`new ActionNode(ctx, ${node.x}, ${node.y}, '${node.action}', ${node.speedToNextNode})`);
+      }else{
+        out.push(`new Node(ctx, ${node.x}, ${node.y}, ${node.speedToNextNode})`);
+      }
+    }
+    let o = JSON.stringify(out, null, 2);
+    o = o.replace(/"/g, '');
+    output.val(o);
+    output.height($("textarea")[0].scrollHeight);
   });
 
   //Load token into project
