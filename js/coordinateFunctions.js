@@ -13,12 +13,7 @@ function findPoint(node, degrees, distance){
 
   let deltaPoints = [0, 0];
   let radians = degrees * Math.PI / 180;
-
-  if ([90, 270].includes(degrees)){
-    deltaPoints[1] = distance;
-    return deltaPoints;
-  }
-
+  
   //Calculate distance
   deltaPoints[1] = distance * Math.sin(radians);
   deltaPoints[0] = distance * Math.cos(radians);

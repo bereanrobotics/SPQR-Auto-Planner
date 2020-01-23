@@ -396,7 +396,7 @@ function createFile(){
     }
 
     //Run any actions
-    if (node && typeof node !== 'undefined' && node.hasAction){
+    if (node && typeof node !== 'undefined' && node.hasAction && node.action && typeof node.action !== 'undefined' && node.action !== ''){
       middle += `${INDENTSPACE}${node.action}\n`;
     }
   }

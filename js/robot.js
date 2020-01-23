@@ -53,7 +53,8 @@ class Robot {
 
         //Keep it from overshooting node
         if (Math.sqrt(movedDistanceX * movedDistanceX + movedDistanceY * movedDistanceY) >= totalMoveDistanceNeeded){
-          let finalPoint = findPoint(new Node(void(0), initialX, initialY, false), this.theta, (speed > 0) ? totalMoveDistanceNeeded : -totalMoveDistanceNeeded);
+          let finalPoint = findPoint(new Node(void(0), initialX, initialY, false), this.theta, (speed < 0) ? -totalMoveDistanceNeeded : totalMoveDistanceNeeded);
+
           this.x = initialX + finalPoint[0];
           this.y = initialY + finalPoint[1];
           clearInterval(id);

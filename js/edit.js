@@ -19,10 +19,12 @@ const BLANKEDITHTML = `<b class="option-item">X:</b>
 <br>
 <br>
 <b id="action-text" class="option-item">Action:</b>
-<input type="text" id="node-action" class="option-item" placeholder="Action" value="">`;
+<input type="text" id="node-action" class="option-item" placeholder="Action" value="" oninput="changeAction(this.value)" onchange="changeAction(this.value)">`;
 const RESETHTML = '<p>No node selected</p>';
 
-var editNode, nodeX, nodeY, nodeSpeed, nodeHasAction, actionText, nodeAction, node;
+var editNode, nodeX, nodeY, nodeSpeed, nodeHasAction, actionText, nodeAction;
+var node = void(0);
+var tempActionStorage = '';
 
 //Display editor
 function displayEditor(){
@@ -34,12 +36,14 @@ function displayEditor(){
   nodeHasAction = $('#node-has-action');
   actionText = $('#action-text');
   nodeAction = $('#node-action');
+  tempActionStorage = '';
 }
 
 //Hide the editor
 function clearEditMode(){
   editNode.html(RESETHTML);
   node = void(0);
+  tempActionStorage = '';
 }
 
 //Load node in the editor
@@ -51,8 +55,8 @@ function loadNode(n){
   if (node.hasAction){
     nodeHasAction.prop('checked', true);
     nodeAction.val(node.action);
-    actionText.css('display', 'shown');
-    nodeAction.css('display', 'shown');
+    actionText.css('display', 'inherit');
+    nodeAction.css('display', 'inherit');
   }else{
     nodeHasAction.prop('checked', false);
     nodeAction.val('');
@@ -102,6 +106,14 @@ function changeNodeSpeed(val){
   node.speedToNextNode = val;
 }
 
+//Change the action of the node
+function changeAction(action){
+  if (node && typeof node !== 'undefined' && node instanceof ActionNode){
+    node.action = action;
+  }
+  tempActionStorage = action;
+}
+
 //Action detection
 function updateAction(){
   if (nodeHasAction.prop('checked')){
@@ -109,9 +121,10 @@ function updateAction(){
     let i = nodes.indexOf(n);
     nodes[i] = new ActionNode(n.ctx, n.x, n.y, '');
     nodes[i].speedToNextNode = nodeSpeed.val();
-    nodeAction.val('');
-    actionText.css('display', 'shown');
-    nodeAction.css('display', 'shown');
+    nodeAction.val(tempActionStorage);
+    actionText.css('display', 'inherit');
+    nodeAction.css('display', 'inherit');
+    node = nodes[i];
   }else{
     let n = node;
     let i = nodes.indexOf(n);
@@ -120,6 +133,8 @@ function updateAction(){
     nodeAction.val('');
     actionText.css('display', 'none');
     nodeAction.css('display', 'none');
+    node = nodes[i];
   }
+  node.outlineColor = '#14dbdb';
   calcOrder();
-};
+}
