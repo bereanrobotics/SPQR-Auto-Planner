@@ -296,7 +296,7 @@ $(document).ready(() => {
       node.draw();
     }
     if (robot) robot.draw();
-  }, 1000 / 60);
+  }, 80 / 1000);
 
   //Create the file on button click
   createButton.click(createFile);

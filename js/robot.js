@@ -14,7 +14,7 @@ class Robot {
     this.x = this.firstNode.x - this.size / 2;
     this.y = this.firstNode.y - this.size / 2;
     this.theta = initialAngle;
-
+    
     //Speed in pixels/frame
     let speed = .04;
 
@@ -43,6 +43,7 @@ class Robot {
     var movedDistanceY = 0;
     var initialX = this.x;
     var initialY = this.y;
+
     return new Promise((resolve, reject) => {
       var id = setInterval(() => {
         let delta = findPoint(new Node(void(0), this.x, this.y), this.theta, this.speed * speed);
@@ -60,7 +61,7 @@ class Robot {
           clearInterval(id);
           resolve();
         }
-      }, 1000 / 60);
+      }, 80 / 1000);
     });
   }
 
@@ -92,7 +93,7 @@ class Robot {
           clearInterval(id);
           resolve();
         }
-      }, 1000 / 60);
+      }, 80 / 1000);
     });
   }
 }
