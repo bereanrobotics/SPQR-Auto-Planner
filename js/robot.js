@@ -74,11 +74,14 @@ class Robot {
       var finalAngle = this.theta - degrees;
       var neededTurnDistance = Math.abs(this.theta - finalAngle);
       var distanceTurned = 0;
-      let turn = this.turnSpeed * speed;
-      if (degrees < 0){
-        turn *= -1;
-      }
       var id = setInterval(() => {
+
+        //Inside interval to check if slider was changed
+        let turn = this.turnSpeed * speed;
+        if (degrees < 0){
+          turn *= -1;
+        }
+
         this.theta -= turn;
         distanceTurned += Math.abs(turn);
 

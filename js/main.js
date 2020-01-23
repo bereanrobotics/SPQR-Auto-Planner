@@ -10,6 +10,7 @@ var towRedButton;
 var ctx, width, height;
 var snapTo = 'y';
 var robot;
+var lastX, lastY;
 var background = new Image()
 var nodes = [];
 var currentAngle;
@@ -136,6 +137,8 @@ $(document).ready(() => {
     }else{
       createMode = true;
       color(createMode);
+      selectedNode = void(0);
+      clearEditMode();
     }
   });
 
@@ -182,8 +185,6 @@ $(document).ready(() => {
         selectedNode = node;
         selectedNode.outlineColor = '#14dbdb';
         loadNode(selectedNode);
-        node.x = x;
-        node.y = y;
         isMovingNode = true;
         break;
       }
@@ -219,6 +220,7 @@ $(document).ready(() => {
     }
 
     if (createMode || !isMovingNode || typeof selectedNode === 'undefined' || !selectedNode) return;
+    updateCoordsOnly();
 
     //Click and drag
     selectedNode.x = x;
@@ -374,7 +376,7 @@ function createFile(){
     if (nextNode && typeof nextNode !== 'undefined'){
       let d = distance(node.x, nextNode.x, node.y, nextNode.y);
       if (d){
-        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, 1.0);\n`; //Times 10 to account for Owen's factor issue
+        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
       }
     }
 
@@ -452,14 +454,13 @@ function color(createMode){
     modeDisplay.text('create');
 
     //Color create mode
-    for (let n in nodes){
-      if (n === 0) continue;
-      let node = nodes[n];
+    for (let node of nodes){
       if (!node.hasAction){
         node.color = GREY;
       }else{
         node.color = ORANGE;
       }
+      node.outlineColor = '#000';
     }
     nodes[0].color = GREEN;
   }
@@ -494,9 +495,9 @@ function decodeNodeToken(token, ctx){
   for (let tokenPart of nodeTokenPart){
     let nodeComponents = tokenPart.split('~');
     if (nodeComponents.length === 3){
-      nodeArray.push(new ActionNode(ctx, parseInt(nodeComponents[0], 10), parseInt(nodeComponents[1], 10), nodeComponents[2]));
+      nodeArray.push(new ActionNode(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10), nodeComponents[2]));
     }else{
-      nodeArray.push(new Node(ctx, parseInt(nodeComponents[0], 10), parseInt(nodeComponents[1], 10)));
+      nodeArray.push(new Node(ctx, parseFloat(nodeComponents[0], 10), parseFloat(nodeComponents[1], 10)));
     }
   }
   return nodeArray;

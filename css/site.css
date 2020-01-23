@@ -38,6 +38,13 @@ footer {
   display: block;
 }
 
+#token-wrapper {
+  width: auto;
+  display: block;
+  padding: 5px;
+  display: block;
+}
+
 #options-wrapper {
   width: auto;
   display: block;

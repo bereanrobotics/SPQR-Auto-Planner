@@ -15,12 +15,13 @@ class Node {
     this.nextNode = void(0);
     this.hasAction = false;
     this.outlineColor= '#000';
+    this.speedToNextNode = 1.0;
   }
 
   draw(){
     this.ctx.strokeStyle = '#000';
     if (this.nextNode && typeof this.nextNode != 'undefined'){
-      this.ctx.lineWidth = 3;
+      this.ctx.lineWidth = 3 * this.speedToNextNode;
       this.ctx.beginPath();
       this.ctx.moveTo(this.x, this.y);
       this.ctx.lineTo(this.nextNode.x, this.nextNode.y);
