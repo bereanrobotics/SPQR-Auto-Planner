@@ -391,20 +391,31 @@ function createFile(){
     let node = nodes[n];
     let nextNode = node.nextNode ? node.nextNode : void(0);
     let twoNodes = nextNode && nextNode.nextNode ? nextNode.nextNode : void(0);
+    var d, theta;
 
     //Calculate distance
     if (nextNode && typeof nextNode !== 'undefined'){
-      let d = distance(node.x, nextNode.x, node.y, nextNode.y);
-      if (d){
-        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
-      }
+      d = distance(node.x, nextNode.x, node.y, nextNode.y);
     }
 
     //Calculate angle between next node and node after
     if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
-      let theta = currentAngle - findDegrees(nextNode, twoNodes);
+      theta = currentAngle - findDegrees(nextNode, twoNodes);
       if (nextNode.speedToNextNode < 0){
         theta += 180;
+      }
+    }
+
+    //Strafing
+    if (d && !(theta % 90) && (theta % 180) && !theta){
+      if (!(theta % 90) && (theta % 270) || theta < 0) {
+
+      }else if (!(theta % 270) || theta > 0){
+
+      }
+    }else{
+      if (d){
+        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
       }
       if (theta && typeof theta !== 'undefined'){
         currentAngle -= theta;

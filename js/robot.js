@@ -14,7 +14,7 @@ class Robot {
     this.x = this.firstNode.x - this.size / 2;
     this.y = this.firstNode.y - this.size / 2;
     this.theta = initialAngle;
-    
+
     //Speed in pixels/frame
     let speed = .04;
 
@@ -95,5 +95,9 @@ class Robot {
         }
       }, 80 / 1000);
     });
+  }
+
+  strafe(){
+    
   }
 }
