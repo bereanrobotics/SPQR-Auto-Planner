@@ -97,7 +97,42 @@ class Robot {
     });
   }
 
-  strafe(){
-    
+  strafe(dir, d, speed){
+    console.log(dir, d, speed);
+    var direction = (dir.replace(/Dir\./gi, '') === 'RIGHT') ? 'r' : 'l';
+    var totalMoveDistanceNeeded = (d / 10) / this.mmPerPixel; //Pixels
+    var movedDistanceX = 0;
+    var movedDistanceY = 0;
+    var initialX = this.x;
+    var initialY = this.y;
+    var strafeAngle = this.theta;
+
+    if (direction === 'r'){
+      strafeAngle -= 90;
+    }else{
+      strafeAngle += 90;
+    }
+
+    console.log(strafeAngle);
+
+    return new Promise((resolve, reject) => {
+      var id = setInterval(() => {
+        let delta = findPoint(new Node(void(0), this.x, this.y), strafeAngle, this.speed * speed);
+        this.x += delta[0];
+        this.y += delta[1];
+        movedDistanceX += Math.abs(delta[0]);
+        movedDistanceY += Math.abs(delta[1]);
+
+        //Keep it from overshooting node
+        if (Math.sqrt(movedDistanceX * movedDistanceX + movedDistanceY * movedDistanceY) >= totalMoveDistanceNeeded){
+          let finalPoint = findPoint(new Node(void(0), initialX, initialY, false), strafeAngle, (speed < 0) ? -totalMoveDistanceNeeded : totalMoveDistanceNeeded);
+
+          this.x = initialX + finalPoint[0];
+          this.y = initialY + finalPoint[1];
+          clearInterval(id);
+          resolve();
+        }
+      }, 80 / 1000);
+    });
   }
 }

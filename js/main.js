@@ -311,9 +311,14 @@ $(document).ready(() => {
     for (let i of instructions){
       var instruction = decodeInstruction(i);
 
-      if (!(['turn', 'drive'].includes(instruction[0]))) continue;
+      if (!(['turn', 'drive', 'strafe'].includes(instruction[0]))) continue;
 
-      await robot[instruction[0]](instruction[1], instruction[2]);
+      if (instruction.length === 3){
+        await robot[instruction[0]](instruction[1], instruction[2]);
+      }else{
+        console.log(instruction);
+      }
+
     }
   });
 
@@ -386,6 +391,8 @@ function createFile(){
   robot.speed = (moveSpeed.val() * mmPerPixel) / (80 / 100);
   robot.turnSpeed = turnSpeed.val();
 
+  var didStrafeToNext = false;
+
   //Do math for nodes
   for (let n in nodes){
     let node = nodes[n];
@@ -396,7 +403,12 @@ function createFile(){
     //Calculate distance
     if (nextNode && typeof nextNode !== 'undefined'){
       d = distance(node.x, nextNode.x, node.y, nextNode.y);
+      if (d && !didStrafeToNext){
+        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
+      }
     }
+
+    didStrafeToNext = false;
 
     //Calculate angle between next node and node after
     if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
@@ -407,16 +419,15 @@ function createFile(){
     }
 
     //Strafing
-    if (d && !(theta % 90) && (theta % 180) && !theta){
-      if (!(theta % 90) && (theta % 270) || theta < 0) {
-
-      }else if (!(theta % 270) || theta > 0){
-
+    if ([90, 270, -90, 270].includes(theta) && n !== 0 && n !== nodes.length - 1 && (nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
+      didStrafeToNext = true;
+      d = distance(nextNode.x, twoNodes.x, nextNode.y, twoNodes.y);
+      if (theta === -90 || theta === 270){
+        middle += `${INDENTSPACE}this.strafe(Dir.RIGHT, ${d * mmPerPixel * 10}, 1.0);\n`;
+      }else{
+        middle += `${INDENTSPACE}this.strafe(Dir.LEFT, ${d * mmPerPixel * 10}, 1.0);\n`;
       }
     }else{
-      if (d){
-        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
-      }
       if (theta && typeof theta !== 'undefined'){
         currentAngle -= theta;
         middle += `${INDENTSPACE}this.turn(${theta}, 1.0);\n`;
@@ -510,9 +521,14 @@ function decodeInstruction(i){
   decodedInstruction.push(instruction.shift());
   instruction = instruction[0];
   instruction.replace(')', '');
-  instruction = instruction.split(', ');
+  instruction = instruction.split(', ');;
+  var firstPart = instruction.shift();
+  var thing = parseFloat(firstPart, 10);
+  decodedInstruction.push((isNaN(firstPart)) ? firstPart : thing);
   decodedInstruction.push(parseFloat(instruction.shift(), 10));
-  decodedInstruction.push(parseFloat(instruction.shift(), 10));
+  if (instruction.length > 0){
+    decodedInstruction.push(parseFloat(instruction.shift(), 10));
+  }
   return decodedInstruction;
 }
 
