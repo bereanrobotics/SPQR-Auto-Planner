@@ -200,8 +200,8 @@ $(document).ready(() => {
     //Get mouse coordinates according to top left of canvas
     var x = e.pageX - canvas.offsetLeft;
     var y = e.pageY - canvas.offsetTop;
-    xElem.text(x);
-    yElem.text(y);
+    xElem.text(Math.round(x * mmPerPixel));
+    yElem.text(Math.round(y * mmPerPixel));
     mouseX = x;
     mouseY = y;
 
@@ -229,10 +229,10 @@ $(document).ready(() => {
   });
 
   //Actions
-  towRedButton.click(function(){
-    nodes = nodes.concat(towRed(ctx));
-    calcOrder();
-  });
+  // towRedButton.click(function(){
+  //   nodes = nodes.concat(towRed(ctx));
+  //   calcOrder();
+  // });
 
   //Main draw loop
   setInterval(function(){
@@ -311,14 +311,13 @@ $(document).ready(() => {
     for (let i of instructions){
       var instruction = decodeInstruction(i);
 
-      if (!(['turn', 'drive', 'strafe'].includes(instruction[0]))) continue;
+      if (!(['turn', 'drive'].includes(instruction[0]))) continue;
 
       if (instruction.length === 3){
         await robot[instruction[0]](instruction[1], instruction[2]);
       }else{
         console.log(instruction);
       }
-
     }
   });
 
@@ -394,49 +393,38 @@ function createFile(){
   var didStrafeToNext = false;
 
   //Do math for nodes
-  for (let n in nodes){
-    let node = nodes[n];
-    let nextNode = node.nextNode ? node.nextNode : void(0);
-    let twoNodes = nextNode && nextNode.nextNode ? nextNode.nextNode : void(0);
+  for (let node of nodes){
+    let nextNode = node.nextNode;
+    let twoNodes = typeof nextNode !== 'undefined' ? nextNode.nextNode : void(0);
     var d, theta;
 
-    //Calculate distance
-    if (nextNode && typeof nextNode !== 'undefined'){
-      d = distance(node.x, nextNode.x, node.y, nextNode.y);
-      if (d && !didStrafeToNext){
-        middle += `${INDENTSPACE}this.drive(${d * mmPerPixel * 10}, ${node.speedToNextNode});\n`; //Times 10 to account for Owen's factor issue
-      }
+    //Skip if last node
+    if (typeof nextNode === 'undefined') continue;
+
+    //Calculate distance to next node
+    d = distance(node.x, nextNode.x, node.y, nextNode.y);
+    if (d > 0){
+      middle += `${INDENTSPACE}this.drive(${Math.round(d * mmPerPixel * 100) / 100}, ${node.speedToNextNode});\n`;
     }
 
-    didStrafeToNext = false;
-
-    //Calculate angle between next node and node after
-    if ((nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
-      theta = currentAngle - findDegrees(nextNode, twoNodes);
-      if (nextNode.speedToNextNode < 0){
-        theta += 180;
-      }
+    //Execute action
+    if (nextNode.hasAction && typeof nextNode.action !== 'undefined'){
+      middle += `${INDENTSPACE}${nextNode.action}\n`;
     }
 
-    //Strafing
-    if ([90, 270, -90, 270].includes(theta) && n !== 0 && n !== nodes.length - 1 && (nextNode && typeof nextNode !== 'undefined') && (twoNodes && typeof twoNodes !== 'undefined')){
-      didStrafeToNext = true;
-      d = distance(nextNode.x, twoNodes.x, nextNode.y, twoNodes.y);
-      if (theta === -90 || theta === 270){
-        middle += `${INDENTSPACE}this.strafe(Dir.RIGHT, ${d * mmPerPixel * 10}, 1.0);\n`;
-      }else{
-        middle += `${INDENTSPACE}this.strafe(Dir.LEFT, ${d * mmPerPixel * 10}, 1.0);\n`;
+    //Calculate angle
+    if (typeof twoNodes !== 'undefined'){
+      let d1, d2, d3;
+      d1 = d;
+      d2 = distance(nextNode.x, twoNodes.x, nextNode.y, twoNodes.y);
+      d3 = distance(node.x, twoNodes.x, node.y, twoNodes.y);
+      if ((node.x === nextNode.x && nextNode.x === twoNodes.x) || (node.y === nextNode.y && nextNode.y === twoNodes.y)){
+        continue;
       }
-    }else{
-      if (theta && typeof theta !== 'undefined'){
-        currentAngle -= theta;
-        middle += `${INDENTSPACE}this.turn(${theta}, 1.0);\n`;
-      }
-    }
-
-    //Run any actions
-    if (node && typeof node !== 'undefined' && node.hasAction && node.action && typeof node.action !== 'undefined' && node.action !== ''){
-      middle += `${INDENTSPACE}${node.action}\n`;
+      theta = Math.acos(((Math.pow(d3, 2) - Math.pow(d2, 2) - Math.pow(d1, 2))/(2 * d2 * d1)) * -1) * 180 / Math.PI;
+      theta *= -1;
+      theta = Math.round(theta * 100) / 100;
+      middle += `${INDENTSPACE}this.turn(${theta}, 1.0);\n`
     }
   }
 
